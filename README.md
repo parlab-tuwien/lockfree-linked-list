@@ -39,7 +39,7 @@ The build process generates six different executables:
 
 Each of the executables takes a number of arguments:
 * `-p <threads>` - the number of threads; optional, defaults to `omp_get_max_threads()`
-* `-B [D|S]` - the benchmark to run - D = deterministic; S = steady (randomized). If omitted, both are run, starting with deterministc.
+* `-B [D|S]` - the benchmark to run - D = deterministic; S = steady (randomized). If omitted, both are run, starting with deterministic.
 
 Additional arguments for deterministic benchmark:
 * `-n <elements>` - the number of elements; optional, defaults to 10000
@@ -52,8 +52,8 @@ Additional arguments for randomized (steady) benchmark:
 * `-S <seed>` - randomization seed
 * `-f <prefill>` - the number of items for prefill; optional, defaults to 10000
 * `-U <keyrange>` - the key range; optional, defaults to 10*prefill
-* `-A <add propability>` - propability of insert operation in percent (0-100); optional, defaults to 10
-* `-R <remove propability>` - propability of remove operation in percent (0-100); optional, defaults to 10
+* `-A <add propability>` - probability of insert operation in percent (0-100); optional, defaults to 10
+* `-R <remove propability>` - probability of remove operation in percent (0-100); optional, defaults to 10
 * `-c <ops>` - number of operations; optional, defaults to 10000
 
 The `run_benchmark.sh` script runs each executable in three different configurations:
@@ -63,10 +63,18 @@ The `run_benchmark.sh` script runs each executable in three different configurat
 
 The number of threads can be configured by setting the `THREAD` environment variable, e.g., `THREADS=16 run_benchmark.sh`.
 
-These settings correspond to the ones used to produce the result tables in the paper.
+These settings correspond to the ones used to produce the result tables in the paper. By setting the environment variable
+`OUTPUT_FORMAT` to `-L` the output is formatted as a LaTeX table.
 
 The `run_steady_benchmark.sh` scripts executes the randomized (steady) benchmark for each executable with varying numbers
 of threads and the following parameters: c=50000, f=16384, U=32768; operation mix 25% add, 25% remove, 50% lookup.   
 Each configuration is run five times, and all the results are collected in the result file `steady_results.csv`.
 These settings correspond to the ones used to produce the scalability charts in the paper. Please note, that you have
 to edit the shell script directly in order to change the varying thread numbers.
+
+The resulting csv has to be massaged a bit in order to be passed to `generate_plots.R`:
+```
+awk '(/;/ && !/Time/) || NR==2' <steady_results.csv >results.csv
+Rscript generate_plots.R
+```
+Note: The following R packages are required in order to run the script: `ggplot2`, `plyr`, `purrr`
