@@ -226,7 +226,7 @@ int rem(long key, list_t *list)
     // drawback that we cannot tell WHO has set the bit, so we would also have to adapt
     // the management of the free-list.
 
-    succ = FAO(&node->next,MARK_BIT);
+    succ = (node_t*)FAO((_Atomic uint64_t*)&node->next, MARK_BIT);
     if (ismarked(succ)) return 0;
 #else    
     succ = LOAD(&node->next);
